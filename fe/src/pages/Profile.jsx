@@ -25,6 +25,7 @@ export default function Profile() {
   const [updateSucces, setUpdateSuccess] = useState(false);
   const [showListingsError, setshowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const [, setDeleteListingsError] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -143,6 +144,29 @@ export default function Profile() {
     }
   }
 
+  const handleDeleteListing = async (listingId) =>{
+    try {
+      setDeleteListingsError(false);
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json();
+
+      if(data.success === false) {
+        setDeleteListingsError(true);
+        return;
+      }
+      setUserListings((prev) => prev.filter((listing) => listing._id !== listingId));
+
+    } catch (error) {
+      setDeleteListingsError(true);
+    }
+  }
+
+  const handleEditListing = () => {
+
+  }
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -188,7 +212,7 @@ export default function Profile() {
       {
         userListings && userListings.length > 0 && 
         <div className='flex flex-col gap-3'>
-          <h1 className='font-semibold text-center text-2xl my-6'>Your Listings</h1>
+          <h1 className='font-semibold text-center text-2xl mt-6'>Your Listings</h1>
           {userListings.map((listing) => (
           <div className='flex justify-between items-center border p-5' key={listing._id}>
             <Link to={`/listings/${listing._id}`}>
@@ -198,8 +222,8 @@ export default function Profile() {
               <p>{listing.name}</p>
             </Link>
             <div className='flex flex-col gap-1'>
-              <button className='text-red-700 uppercase' >Delete</button>
-              <button className='text-green-700 uppercase'>Edit</button>
+              <button onClick={() => handleDeleteListing(listing._id)} className='text-red-700 uppercase' >Delete</button>
+              <button onClick={handleEditListing} className='text-green-700 uppercase'>Edit</button>
             </div>
           </div>
         ))}
